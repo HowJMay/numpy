@@ -143,4 +143,24 @@ NPY_FINLINE npyv_s64 npyv_min_s64(npyv_s64 a, npyv_s64 b)
     return npyv_select_s64(npyv_cmplt_s64(a, b), a, b);
 }
 
+// ceil
+#ifdef NPY_HAVE_SSE41
+    #define npyv_ceil_f32 _mm_ceil_ps
+    #define npyv_ceil_f64 _mm_ceil_pd
+#else
+    NPY_FINLINE npyv_f32 npyv_ceil_f32(npyv_f32 a)
+    {
+        npyv_f32 a_not_nan = _mm_cmpord_ps(a, a);
+        npyv_f32 trunc_a = _mm_cvtepi32_ps(_mm_cvttps_epi32(a));
+        npyv_f32 has_trunc = _mm_cmplt_ps(trunc_a, a);
+        npyv_f32 ceil_res = _mm_add_ps(trunc_a, _mm_and_ps(has_trunc, _mm_set_ps(1.0, 1.0, 1.0, 1.0)));
+        return npyv_select_f32(_mm_castps_si128(a_not_nan), a, ceil_res);
+    }
+    NPY_FINLINE npyv_f64 npyv_ceil_f64(npyv_f64 a)
+    {
+        double *_a = (double *) &a;
+        return _mm_set_pd(ceil(_a[1]), ceil(_a[0]));
+    }
+#endif
+
 #endif // _NPY_SIMD_SSE_MATH_H

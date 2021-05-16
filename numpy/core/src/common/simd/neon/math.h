@@ -153,4 +153,10 @@ NPY_FINLINE npyv_s64 npyv_min_s64(npyv_s64 a, npyv_s64 b)
     return vbslq_s64(npyv_cmplt_s64(a, b), a, b);
 }
 
+// ceil
+#if NPY_SIMD_F64
+    #define npyv_ceil_f32 vrndpq_f32
+    #define npyv_ceil_f64 vrndpq_f64
+#endif // NPY_SIMD_F64
+
 #endif // _NPY_SIMD_NEON_MATH_H

@@ -328,7 +328,22 @@ class _SIMD_FP(_Test_Utility):
         data_square = [x*x for x in data]
         square = self.square(vdata)
         assert square == data_square
-        
+
+    def test_ceil(self):
+        pinf, ninf, nan = self._pinfinity(), self._ninfinity(), self._nan()
+        data = self._data()
+        vdata = self.load(self._data())
+        # ceil
+        ceil_cases = ((nan, nan), (pinf, pinf), (ninf, ninf))
+        for case, desired in ceil_cases:
+            data_ceil = [desired]*self.nlanes
+            ceil = self.ceil(self.setall(case))
+            assert ceil == pytest.approx(data_ceil, nan_ok=True)
+
+        data_ceil = [math.ceil(x) for x in data]
+        ceil = self.ceil(vdata)
+        assert ceil == data_ceil
+
     def test_max(self):
         """
         Test intrinsics:
